@@ -1,17 +1,23 @@
-#ifndef SCREENSHOT_H
-#define SCREENSHOT_H
+#ifndef SCREEN_H
+#define SCREEN_H
 
 #include <QPixmap>
 
 #include <vector>
-
 #include <screen/screen.h>
 
-class Screenshot
+class Screen
 {
 public:
-    Screenshot();
-    ~Screenshot();
+    Screen();
+    ~Screen();
+
+    enum Rotation {
+        SCREEN_ROTATION_NONE = 0,
+        SCREEN_ROTATION_90 = 90,
+        SCREEN_ROTATION_180 = 180,
+        SCREEN_ROTATION_270 = 270
+    };
 
     /**
      * @brief  Get list of displays
@@ -24,9 +30,11 @@ public:
     int displayCount() const;
 
     /**
-     * @brief Get display resolution
+     * @brief  Get display resolution
+     * @return  The width & heigh might get swapped if the screen is rotated
      */
-    QSize displayResolution(screen_display_t &_display) const;
+    QSize displayResolution(screen_display_t _display) const;
+    Rotation displayRotation(screen_display_t _display) const;
 
     /**
      * @brief  Take the screenshot
@@ -43,4 +51,4 @@ private:
     std::vector<screen_display_t> m_displayList;
 };
 
-#endif // SCREENSHOT_H
+#endif // SCREEN_H

@@ -1,4 +1,4 @@
-QT += core
+QT += core network
 CONFIG += c++11
 TARGET = betterss
 
@@ -10,10 +10,13 @@ INSTALLS += target
 
 SOURCES += appmain.cpp \
             main.cpp \
-            screenshot.cpp
+            network/tcptransceiver.cpp \
+            screenmanager.cpp
 
 HEADERS += appmain.h \
-    screenshot.h
+    config.h \
+    network/tcptransceiver.h \
+    screenmanager.h
 
 INCLUDEPATH+=E:/fw/framework/include
 INCLUDEPATH+=E:/fw/QNX/qnx700/target/qnx7/usr/include

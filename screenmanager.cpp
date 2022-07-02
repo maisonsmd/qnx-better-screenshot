@@ -1,4 +1,4 @@
-#include "screenshot.h"
+#include "screenmanager.h"
 
 #include <QDebug>
 #include <QImage>
@@ -6,7 +6,7 @@
 #include <errno.h>
 #include <cstdlib>
 
-Screenshot::Screenshot()
+Screen::Screen()
 {
     if (!createScreenContext()) {
         return;
@@ -17,37 +17,55 @@ Screenshot::Screenshot()
     }
 }
 
-Screenshot::~Screenshot() {
+Screen::~Screen() {
     screen_destroy_context(m_context);
 }
 
-std::vector<screen_display_t> Screenshot::displays() const
+std::vector<screen_display_t> Screen::displays() const
 {
     return m_displayList;
 }
 
-int Screenshot::displayCount() const
+int Screen::displayCount() const
 {
     return m_displayList.size();
 }
 
-QSize Screenshot::displayResolution(screen_display_t &_display) const
+QSize Screen::displayResolution(screen_display_t _display) const
 {
-    int size[2];
+    int size[2] {0};
+    int rotation = displayRotation(_display);
+
     QSize result {};
 
     if (screen_get_display_property_iv(_display, SCREEN_PROPERTY_NATIVE_RESOLUTION, size) != 0) {
-        qCritical("Failed to get display size, errno: %d(%s)", errno, strerror(errno));
+        qCritical("Failed to get display rotation, errno: %d(%s)", errno, strerror(errno));
         return result;
     }
 
-    result.setWidth(size[0]);
-    result.setHeight(size[1]);
+    if (rotation == Rotation::SCREEN_ROTATION_90
+            || rotation == Rotation::SCREEN_ROTATION_270) {
+        result.setWidth(size[1]);
+        result.setHeight(size[0]);
+    } else {
+        result.setWidth(size[0]);
+        result.setHeight(size[1]);
+    }
 
     return result;
 }
 
-QPixmap Screenshot::captureScreen(int _displayIndex, int _x, int _y, int _w, int _h)
+Screen::Rotation Screen::displayRotation(screen_display_t _display) const
+{
+    int rotation {SCREEN_ROTATION_NONE};
+    if (screen_get_display_property_iv(_display, SCREEN_PROPERTY_ROTATION, &rotation) != 0) {
+        qCritical("Failed to get display rotation, errno: %d(%s)", errno, strerror(errno));
+        return SCREEN_ROTATION_NONE;
+    }
+    return (Rotation)rotation;
+}
+
+QPixmap Screen::captureScreen(int _displayIndex, int _x, int _y, int _w, int _h)
 {
     QPixmap result;
 
@@ -64,50 +82,15 @@ QPixmap Screenshot::captureScreen(int _displayIndex, int _x, int _y, int _w, int
     auto display = m_displayList[_displayIndex];
     auto size = displayResolution(display);
 
+    qDebug() << "display resolution: " << size;
+
     if (_w <= 0 || _w > size.width())
         _w = size.width();
 
     if (_h <= 0 || _h > size.height())
         _h = size.height();
 
-#if 0
-    // Find corresponding display in SCREEN_DISPLAY_MANAGER_CONTEXT
-    auto m_display = m_displayList[0];
-    int count = 0;
-    screen_display_t display = 0;
-    screen_get_context_property_iv(m_context, SCREEN_PROPERTY_DISPLAY_COUNT, &count);
-
-    if (count > 0) {
-        const size_t idLen = 30;
-        char matchId[idLen];
-        char id[idLen];
-        bool found = false;
-
-        screen_display_t *displays = static_cast<screen_display_t*>
-                (calloc(count, sizeof(screen_display_t)));
-
-        screen_get_context_property_pv(m_context, SCREEN_PROPERTY_DISPLAYS, (void **)displays);
-        screen_get_display_property_cv(m_display,  SCREEN_PROPERTY_ID_STRING, idLen, matchId);
-
-        while (count && !found) {
-            --count;
-            screen_get_display_property_cv(displays[count], SCREEN_PROPERTY_ID_STRING, idLen, id);
-            qDebug() << id << matchId;
-            found = !strncmp(id, matchId, idLen);
-        }
-
-        if (found) {
-            display = displays[count];
-            qDebug("index: %d", count);
-        }
-
-        free(displays);
-
-        if (!found) {
-            return QImage();
-        }
-    }
-#endif
+    qDebug() << _x << _y << _w << _h;
 
     screen_pixmap_t pixmap;
     if (screen_create_pixmap(&pixmap, m_context) != 0) {
@@ -148,7 +131,7 @@ QPixmap Screenshot::captureScreen(int _displayIndex, int _x, int _y, int _w, int
     return result;
 }
 
-bool Screenshot::createScreenContext()
+bool Screen::createScreenContext()
 {
     if (screen_create_context(&m_context,
                               SCREEN_DISPLAY_MANAGER_CONTEXT
@@ -160,7 +143,7 @@ bool Screenshot::createScreenContext()
     return true;
 }
 
-bool Screenshot::findDisplays()
+bool Screen::findDisplays()
 {
     m_displayList.clear();
 

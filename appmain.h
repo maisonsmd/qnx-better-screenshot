@@ -1,66 +1,96 @@
 #ifndef APPMAIN_H
 #define APPMAIN_H
 
-#include <QImage>
-#include <QDir>
+#include <QGuiApplication>
+#include <QPixmap>
 #include <QDebug>
 #include <QTimer>
+#include <QDir>
+#include <QQueue>
 #include <QElapsedTimer>
 #include <QThread>
 
-#include "screenshot.h"
+#include "errno.h"
+
+#include "screenmanager.h"
+#include "config.h"
+#include "network/tcptransceiver.h"
 
 class AppMain : public QObject {
     Q_OBJECT
 
-    QPixmap image;
-    Screenshot ss;
-    QTimer timer;
-
 public:
     AppMain() {
-        connect(&timer, &QTimer::timeout, this, &AppMain::capture);
+        connect(this, &AppMain::quit, qApp, &QCoreApplication::quit, Qt::QueuedConnection);
     }
 
     void init() {
-        timer.setInterval(100);
-        timer.setSingleShot(true);
-        timer.start();
+        // m_transceiver->init();
     }
 
-    void saveImage(const QPixmap &image)
+    void captureAndSave() {
+        QTimer::singleShot(0, this, [&](){
+            QThread::currentThread()->setPriority(QThread::HighestPriority);
+            QElapsedTimer timer;
+            timer.start();
+
+            auto config = Config::instance();
+
+            saveImage(m_screen.captureScreen(
+                          config->getDisplayIndex(),
+                          config->getX(), config->getY(),
+                          config->getW(), config->getH()
+                          ),
+                      config->getFileName());
+
+            emit quit();
+            qDebug() << timer.elapsed();
+        });
+    }
+
+#if 1
+    void saveImage(const QPixmap &_image, const QString &_name)
     {
-        if (!image) {
+        if (!_image) {
             qCritical("Invalid image");
             return;
         }
 
-        qDebug() << image.size();
 
-        const QString path = "/var/tmp/bs.png";
+        QString path = "/var/tmp/screenshot/";
+        QDir dir(path);
 
-        if (!image.save(path)) {
-            qCritical("Could not save the image");
+        if (!dir.exists()) {
+            dir.mkpath(path);
+        }
+
+        if (!_image.save(path + _name, "png", 50)) {
+            qCritical("Failed to save the image, err %d(%s)", errno, strerror(errno));
         }
     }
+#endif
+
+signals:
+    void quit();
 
 public slots:
     void capture() {
-        qDebug("capturing");
-
-        QThread::currentThread()->setPriority(QThread::HighestPriority);
-        QElapsedTimer e;
-
-        e.start();
-        image = ss.captureScreen(0, 0, 0, 100, 100);
-        qDebug() << e.elapsed();
-
-        e.restart();
-        saveImage(image);
-        qDebug() << e.elapsed();
-
-        qDebug("done");
+        // m_imageId++;
+        // m_imageQueue.push_back({m_imageId, m_screen.captureScreen(0, 0, 0, 100, 100)});
     }
+
+private:
+    Transceiver *m_transceiver {Transceiver::instance()};
+
+    Screen m_screen {};
+    QTimer m_timer {};
+
+    size_t m_imageId {0};
+    struct Image {
+        size_t id;
+        QPixmap image;
+    };
+    QQueue<Image> m_imageQueue {};
 };
 
 
