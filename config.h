@@ -1,8 +1,9 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#include <QDebug>
-#include <QDateTime>
+#include <string>
+#include <ctime>
+#include <cstdio>
 
 class Config {
 public:
@@ -15,7 +16,7 @@ public:
     }
 
     void loadDefaults() {
-        m_filename = QDateTime::currentDateTime().toString("yyyy_MM_dd-hh_mm_ss") + ".png";
+        m_filename = getCurrentDateTimeString() + ".png";
     }
 
     void parseParameters(int argc, char **argv) {
@@ -23,36 +24,44 @@ public:
 
         // skip first param (exec path)
         for (int i = 1; i < argc; ++i) {
-            QString p = argv[i];
-            auto pair = p.split("=");
+            std::string p = argv[i];
+            auto delimiterIndex = p.find("=");
 
-            if (pair.size() != 2) {
-                qWarning() << "Unknow parameter: " << p;
+            if (delimiterIndex == std::string::npos) {
+                printf("Unknown parameter: %s", p.c_str());
                 continue;
             }
 
-            if (pair.first() == "filename") {
-                m_filename = pair.last();
+            auto key = p.substr(0, delimiterIndex);
+            auto value = p.substr(delimiterIndex + 1);
+
+            if (key.empty() || value.empty()) {
+                printf("Invalid value: %s", p.c_str());
+                continue;
             }
-            if (pair.first() == "display") {
-                m_displayIndex = pair.last().toInt();
+
+            if (key == "filename") {
+                m_filename = value;
             }
-            if (pair.first() == "x") {
-                m_x = pair.last().toInt();
+            if (key == "display") {
+                m_displayIndex = std::stoi(value);
             }
-            if (pair.first() == "y") {
-                m_y = pair.last().toInt();
+            if (key == "x") {
+                m_x = std::stoi(value);
             }
-            if (pair.first() == "w") {
-                m_w = pair.last().toInt();
+            if (key == "y") {
+                m_y = std::stoi(value);
             }
-            if (pair.first() == "h") {
-                m_h = pair.last().toInt();
+            if (key == "w") {
+                m_w = std::stoi(value);
+            }
+            if (key == "h") {
+                m_h = std::stoi(value);
             }
         }
     }
 
-    QString getFileName() const { return m_filename; }
+    std::string getFileName() const { return m_filename; }
     int getDisplayIndex() const { return m_displayIndex; }
     int getX() const { return m_x; }
     int getY() const { return m_y; }
@@ -63,8 +72,18 @@ private:
     Config() {}
     Config(const Config&) {}
 
+    static std::string getCurrentDateTimeString() {
+        // get current time
+        std::time_t t = std::time(0);
+        std::tm *now = std::localtime(&t);
+
+        char result[100];
+        std::strftime(result, sizeof(result), "%Y_%m_%d-%H_%M_%S", now);
+        return std::string(result);
+    }
+
 private:
-    QString m_filename {};
+    std::string m_filename {};
     int m_displayIndex {0};
     int m_x {0};
     int m_y {0};

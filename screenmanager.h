@@ -1,10 +1,10 @@
 #ifndef SCREEN_H
 #define SCREEN_H
 
-#include <QPixmap>
-
+#include <cstdio>
 #include <vector>
 #include <screen/screen.h>
+#include <memory>
 
 class Screen
 {
@@ -17,6 +17,11 @@ public:
         SCREEN_ROTATION_90 = 90,
         SCREEN_ROTATION_180 = 180,
         SCREEN_ROTATION_270 = 270
+    };
+
+    struct Size {
+        int w;
+        int h;
     };
 
     /**
@@ -33,18 +38,19 @@ public:
      * @brief  Get display resolution
      * @return  The width & heigh might get swapped if the screen is rotated
      */
-    QSize displayResolution(screen_display_t _display) const;
+    Size displayResolution(screen_display_t _display) const;
     Rotation displayRotation(screen_display_t _display) const;
 
     /**
      * @brief  Take the screenshot
      * @param displayIndex  The index of the display
      */
-    QPixmap captureScreen(int _displayIndex = 0, int _x = 0, int _y = 0, int _w = -1, int _h = -1);
+    void captureScreen(int _displayIndex = 0, int _x = 0, int _y = 0, int _w = -1, int _h = -1);
 
 private:
     bool createScreenContext();
     bool findDisplays();
+    bool saveBmp(char *_data, int _w, int _h, int _stride);
 
 private:
     screen_context_t m_context;
