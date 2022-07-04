@@ -1,6 +1,7 @@
 #include "screenmanager.h"
 
 #include <errno.h>
+#include <cstdio>
 #include <cstdlib>
 #include <string>
 #include <sstream>
@@ -237,29 +238,20 @@ bool Screen::findDisplays()
     return true;
 }
 
-#include <cstdio>
-bool Screen::saveBmp(char *_data, int _w, int _h, int _stride)
+void Screen::saveBmp(char *_data, int _w, int _h, int _stride)
 {
     // https://stackoverflow.com/questions/2654480/writing-bmp-image-in-pure-c-c-without-other-libraries
     FILE *f;
     int filesize = 54 + 3 * _w * _h;
 
-    unsigned char *img = (unsigned char *)malloc(3 * _w * _h);
+    char *img = (char *)std::malloc(3 * _w * _h);
     memset(img, 0, 3 * _w * _h);
 
     for(int y = 0; y < _h; y++) {
         for(int x = 0; x < _w; x++) {
-            int b = *(_data + (y * _stride + 3 * x) + 0);
-            int g = *(_data + (y * _stride + 3 * x) + 1);
-            int r = *(_data + (y * _stride + 3 * x) + 2);
-
-            if (r > 255) r = 255;
-            if (g > 255) g = 255;
-            if (b > 255) b = 255;
-
-            img[(x + y * _w) * 3 + 2] = (unsigned char)(r);
-            img[(x + y * _w) * 3 + 1] = (unsigned char)(g);
-            img[(x + y * _w) * 3 + 0] = (unsigned char)(b);
+            img[(y * _w + x) * 3 + 0] = _data[(y * _stride + 3 * x) + 0];
+            img[(y * _w + x) * 3 + 1] = _data[(y * _stride + 3 * x) + 1];
+            img[(y * _w + x) * 3 + 2] = _data[(y * _stride + 3 * x) + 2];
         }
     }
 
@@ -281,7 +273,7 @@ bool Screen::saveBmp(char *_data, int _w, int _h, int _stride)
     bmpInfoHeader[10] = (unsigned char)(      _h >> 16);
     bmpInfoHeader[11] = (unsigned char)(      _h >> 24);
 
-    f = fopen(("/var/tmp/" + Config::instance()->getFileName()).c_str(), "wb");
+    f = fopen(("/var/tmp/" + Config::instance()->getFileName("bmp")).c_str(), "wb");
 
     fwrite(bmpFileHeader, 1, 14, f);
     fwrite(bmpInfoHeader, 1, 40, f);
@@ -291,8 +283,9 @@ bool Screen::saveBmp(char *_data, int _w, int _h, int _stride)
         fwrite(bmpPad, 1, (4 - (_w * 3) % 4) % 4, f);
     }
 
-    free(img);
+    std::free(img);
     fclose(f);
-    return true;
+
+    return;
 }
 

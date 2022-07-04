@@ -50,7 +50,7 @@ public:
 private:
     bool createScreenContext();
     bool findDisplays();
-    bool saveBmp(char *_data, int _w, int _h, int _stride);
+    void saveBmp(char *_data, int _w, int _h, int _stride);
 
 private:
     screen_context_t m_context;

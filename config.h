@@ -16,7 +16,7 @@ public:
     }
 
     void loadDefaults() {
-        m_filename = getCurrentDateTimeString() + ".png";
+        m_filename = getCurrentDateTimeString();
     }
 
     void parseParameters(int argc, char **argv) {
@@ -61,7 +61,7 @@ public:
         }
     }
 
-    std::string getFileName() const { return m_filename; }
+    std::string getFileName(const std::string &format) const { return m_filename + "." + format; }
     int getDisplayIndex() const { return m_displayIndex; }
     int getX() const { return m_x; }
     int getY() const { return m_y; }
