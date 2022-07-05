@@ -14,7 +14,7 @@ The `screenshot` command from QNX is slow & lacks of some features
 ## Performance
 |                                      | screenshot | betterss |
 |--------------------------------------|------------|----------|
-| Full screen capture time (1920x1080) | ~1.47s     |  ~0.16s  |
+| Full screen capture time (1920x1080) | ~1.47s     |  ~0.10s  |
 
 ## Usage
 
