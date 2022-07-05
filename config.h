@@ -5,6 +5,7 @@
 #include <ctime>
 #include <cstdio>
 #include <cstdlib>
+#include <cerrno>
 
 class Config {
 public:
@@ -30,7 +31,7 @@ public:
 
             if (delimiterIndex == std::string::npos) {
                 printf("Unknown parameter: %s", p.c_str());
-                continue;
+                exit(EINVAL);
             }
 
             auto key = p.substr(0, delimiterIndex);
