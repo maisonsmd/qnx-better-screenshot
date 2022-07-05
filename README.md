@@ -54,7 +54,7 @@ Note: for custom locations, the path must exists (I didn't do the `mkdir`)
 
 You have to try each index to find the desired display
 
-# Build
+## Build
 
 First, run the `proteus_build_config.sh` script to setup enviroment (compiler,...)
 
