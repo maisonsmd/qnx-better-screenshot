@@ -8,6 +8,11 @@
 
 #include "config.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb/stb_image.h"
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb/stb_image_write.h"
+
 class Rectangle {
 public:
     Rectangle() : m_x(0), m_y(0), m_w(0), m_h(0) {}
@@ -245,14 +250,9 @@ void Screen::saveBmp(char *_data, int _w, int _h, int _stride)
     int filesize = 54 + 3 * _w * _h;
 
     char *img = (char *)std::malloc(3 * _w * _h);
-    memset(img, 0, 3 * _w * _h);
 
     for(int y = 0; y < _h; y++) {
-        for(int x = 0; x < _w; x++) {
-            img[(y * _w + x) * 3 + 0] = _data[(y * _stride + 3 * x) + 0];
-            img[(y * _w + x) * 3 + 1] = _data[(y * _stride + 3 * x) + 1];
-            img[(y * _w + x) * 3 + 2] = _data[(y * _stride + 3 * x) + 2];
-        }
+        memcpy(img + y * _w * 3, _data + y * _stride, _w * 3);
     }
 
     unsigned char bmpFileHeader[14] = {'B','M', 0,0,0,0, 0,0, 0,0, 54,0,0,0};
@@ -288,4 +288,3 @@ void Screen::saveBmp(char *_data, int _w, int _h, int _stride)
 
     return;
 }
-
