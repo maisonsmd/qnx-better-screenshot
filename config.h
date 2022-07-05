@@ -4,6 +4,7 @@
 #include <string>
 #include <ctime>
 #include <cstdio>
+#include <cstdlib>
 
 class Config {
 public:
@@ -37,10 +38,10 @@ public:
 
             if (key.empty() || value.empty()) {
                 printf("Invalid value: %s", p.c_str());
-                continue;
+                exit(EINVAL);
             }
 
-            if (key == "filename") {
+            if (key == "file") {
                 m_filename = value;
             }
             if (key == "display") {
@@ -61,7 +62,19 @@ public:
         }
     }
 
-    std::string getFileName(const std::string &format) const { return m_filename + "." + format; }
+    std::string getFileName(const std::string &format) const {
+        auto name = m_filename;
+
+        if (name.empty()) {
+            name = getCurrentDateTimeString();
+        }
+
+        if (name.at(0) == '/') {
+            return name + "." + format;
+        }
+
+        return "/var/tmp/" + name + "." + format;
+    }
     int getDisplayIndex() const { return m_displayIndex; }
     int getX() const { return m_x; }
     int getY() const { return m_y; }
@@ -79,6 +92,7 @@ private:
 
         char result[100];
         std::strftime(result, sizeof(result), "%Y_%m_%d-%H_%M_%S", now);
+
         return std::string(result);
     }
 

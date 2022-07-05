@@ -273,7 +273,13 @@ void Screen::saveBmp(char *_data, int _w, int _h, int _stride)
     bmpInfoHeader[10] = (unsigned char)(      _h >> 16);
     bmpInfoHeader[11] = (unsigned char)(      _h >> 24);
 
-    f = fopen(("/var/tmp/" + Config::instance()->getFileName("bmp")).c_str(), "wb");
+    auto path = Config::instance()->getFileName("bmp");  
+    f = fopen(path.c_str(), "wb");
+
+    if (!f) {
+        printf("Failed opening file: %s\n", path.c_str());
+        return;
+    }
 
     fwrite(bmpFileHeader, 1, 14, f);
     fwrite(bmpInfoHeader, 1, 40, f);
