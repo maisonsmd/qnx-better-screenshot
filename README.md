@@ -1,8 +1,8 @@
 # Better screenshot (`betterss`)
 
-This project works as a replacement for QNX `screenshot`
+This project works as a replacement for QNX's `screenshot`
 
-The `screenshot` command from QNX is slow & lacks of some feature
+The `screenshot` command from QNX is slow & lacks of some features
 
 ## Feature
 
@@ -31,6 +31,16 @@ If you want to save to another location:
 ./betterss file=/var/screenshot/image001
 ```
 
-The file extension `.bmp` will be concatinated
+The file extension `.bmp` will be concatenated
 
 Note: for custom locations, the path must exists (I didn't do the `mkdir`)
+
+# Build
+
+First, run the `proteus_build_config.sh` script to setup enviroment (compiler,...)
+
+Then `cd` to source code directory:
+```shell
+cmake .
+make
+```
