@@ -9,8 +9,8 @@ The `screenshot` command from QNX is slow & lacks of some features
 | Feature                              | screenshot | betterss |
 |--------------------------------------|------------|----------|
 | Capture any display                  |  &check;   |  &check; |
-| Capture any area of the screen       |  &check;   |  &cross; |
-| Support PNG (slower than BMP)        |  &check;   |  &cross; |
+| Capture any area of the screen       |  &cross;   |  &check; |
+| Support PNG (slower than BMP)        |  &cross;   |  &check; |
 
 ## Performance
 |                                      | screenshot | betterss |
