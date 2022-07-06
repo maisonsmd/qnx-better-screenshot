@@ -9,6 +9,12 @@
 
 class Config {
 public:
+    enum class ImageType
+    {
+        BMP,
+        PNG
+    };
+
     static Config *instance() {
         static Config *_instance {nullptr};
         if (!_instance) {
@@ -60,6 +66,13 @@ public:
             if (key == "h") {
                 m_h = std::stoi(value);
             }
+            if (key == "type") {
+                if (value == "png") {
+                    m_type = ImageType::PNG;
+                } else {
+                    m_type = ImageType::BMP;
+                }
+            }
         }
     }
 
@@ -81,6 +94,7 @@ public:
     int getY() const { return m_y; }
     int getW() const { return m_w; }
     int getH() const { return m_h; }
+    ImageType getImageType() { return m_type; }
 
 private:
     Config() {}
@@ -104,6 +118,7 @@ private:
     int m_y {0};
     int m_w {-1};
     int m_h {-1};
+    ImageType m_type {ImageType::BMP};
 };
 
 #endif // CONFIG_H

@@ -10,6 +10,7 @@ The `screenshot` command from QNX is slow & lacks of some features
 |--------------------------------------|------------|----------|
 | Capture any display                  |  &check;   |  &check; |
 | Capture any area of the screen       |  &check;   |  &cross; |
+| Support PNG (slower than BMP)        |  &check;   |  &cross; |
 
 ## Performance
 |                                      | screenshot | betterss |
@@ -42,6 +43,12 @@ The file extension `.bmp` will be concatenated
 
 Note: for custom locations, the path must exists (I didn't do the `mkdir`)
 
+### Export as PNG
+
+```shell
+./betterss type=png
+```
+Encoder: [`fpng`](https://github.com/richgel999/fpng)
 
 ### Capture another display
 

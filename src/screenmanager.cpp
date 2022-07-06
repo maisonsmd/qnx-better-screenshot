@@ -7,6 +7,7 @@
 #include <sstream>
 
 #include "config.h"
+#include "fpng.h"
 
 class Rectangle {
 public:
@@ -184,7 +185,8 @@ void Screen::captureScreen(int _displayIndex, int _x, int _y, int _w, int _h)
     err = err || screen_read_display(display, buffer, 1, rect, 0);
 
     if (err == 0) {
-        saveBmp((char *)pointer, intersection.width(), intersection.height(), stride);
+        // saveBmp((char *)pointer, intersection.width(), intersection.height(), stride);
+        saveImage((char *)pointer, intersection.width(), intersection.height(), stride);
     } else {
         printf("Capture error, errno: %d(%s)\n", errno, strerror(errno));
     }
@@ -238,10 +240,18 @@ bool Screen::findDisplays()
     return true;
 }
 
+void Screen::saveImage(char *_data, int _w, int _h, int _stride)
+{
+    if (Config::instance()->getImageType() == Config::ImageType::PNG) {
+        savePng(_data, _w, _h, _stride);
+    } else {
+        saveBmp(_data, _w, _h, _stride);
+    }
+}
+
 void Screen::saveBmp(char *_data, int _w, int _h, int _stride)
 {
     // https://stackoverflow.com/questions/2654480/writing-bmp-image-in-pure-c-c-without-other-libraries
-    FILE *f;
 
     // the length of each row must be a multiplier of 4, so add padding if necessary
     const int padding = (4 - (_w * 3) % 4) % 4;
@@ -273,14 +283,6 @@ void Screen::saveBmp(char *_data, int _w, int _h, int _stride)
     bmpInfoHeader[10] = (char)(      _h >> 16);
     bmpInfoHeader[11] = (char)(      _h >> 24);
 
-    auto path = Config::instance()->getFileName("bmp");  
-    f = fopen(path.c_str(), "wb");
-
-    if (!f) {
-        printf("Failed opening file: %s\n", path.c_str());
-        return;
-    }
-
     append(bmpFileHeader, 14);
     append(bmpInfoHeader, 40);
 
@@ -289,10 +291,33 @@ void Screen::saveBmp(char *_data, int _w, int _h, int _stride)
         append(bmpPad, padding);
     }
 
+    auto path = Config::instance()->getFileName("bmp");  
+    FILE *f = fopen(path.c_str(), "wb");
+    if (!f) {
+        printf("Failed opening file: %s\n", path.c_str());
+        return;
+    }
     fwrite(img, fsize, 1, f);
     fclose(f);
 
     std::free(img);
     
     return;
+}
+
+void Screen::savePng(char *_data, int _w, int _h, int _stride)
+{
+    char *img = (char *)std::malloc(3  * _w * _h);
+
+    for (int y = 0; y < _h; ++y) {
+        memcpy(img + y * _w * 3, _data + y * _stride, _w * 3);
+    }
+
+    auto path = Config::instance()->getFileName("png");  
+
+    if (!fpng::fpng_encode_image_to_file(path.c_str(), img, _w, _h, 3)) {
+        printf("Error encoding to file\n");
+    }
+
+    std::free(img);
 }
