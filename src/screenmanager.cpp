@@ -75,6 +75,8 @@ Screen::Screen()
     if (!findDisplays()) {
         return;
     }
+
+    fpng::fpng_init();
 }
 
 Screen::~Screen() {

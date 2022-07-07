@@ -192,8 +192,9 @@ namespace fpng
 		const uint8_t* pBytes = (const uint8_t*)p;
 #if 1 // Fix for QNX BGR order
 		return ((uint32_t)pBytes[2]) | (((uint32_t)pBytes[1]) << 8U) | (((uint32_t)pBytes[0]) << 16U);
-#endif
+#else
 		return ((uint32_t)pBytes[0]) | (((uint32_t)pBytes[1]) << 8U) | (((uint32_t)pBytes[2]) << 16U);
+#endif
 #endif
 	}
 
