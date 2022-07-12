@@ -5,10 +5,14 @@
 #include <vector>
 #include <screen/screen.h>
 #include <memory>
+#include <functional>
 
 class Screen
 {
 public:
+    //                                           raw   x,y,w,h  stride
+    using OnCaptureCallback = std::function<void(void *, int *, int)>;
+
     Screen();
     ~Screen();
 
@@ -47,16 +51,20 @@ public:
      */
     void captureScreen(int _displayIndex = 0, int _x = 0, int _y = 0, int _w = -1, int _h = -1);
 
+    /**
+     * @brief  Set the callback to be called after capturing
+     */
+    void setCaptureCallback(const OnCaptureCallback &_callback);
+
 private:
     bool createScreenContext();
     bool findDisplays();
-    void saveImage(char *_data, int _w, int _h, int _stride);
-    void saveBmp(char *_data, int _w, int _h, int _stride);
-    void savePng(char *_data, int _w, int _h, int _stride);
 
 private:
-    screen_context_t m_context;
-    std::vector<screen_display_t> m_displayList;
+    screen_context_t m_context {};
+    std::vector<screen_display_t> m_displayList {};
+
+    OnCaptureCallback m_callback {};
 };
 
 #endif // SCREEN_H
