@@ -2,20 +2,20 @@
 
 This project works as a replacement for QNX's `screenshot`
 
-The `screenshot` command from QNX is slow & lacks of some features
+The [`screenshot`](https://www.qnx.com/developers/docs/7.0.0/com.qnx.doc.screen/topic/manual/screenshot.html) command from QNX is slow & lacks of some features
 
 ## Feature
 
-| Feature                              | screenshot | betterss |
+| Feature                              | [`screenshot`](https://www.qnx.com/developers/docs/7.0.0/com.qnx.doc.screen/topic/manual/screenshot.html) | `betterss` |
 |--------------------------------------|------------|----------|
-| Capture any display                  |  &check;   |  &check; |
-| Capture any area of the screen       |  &cross;   |  &check; |
-| Support PNG (slower than BMP)        |  &cross;   |  &check; |
+| Capture any display                  |  ✅   |  ✅ |
+| Capture any area of the screen       |  ❌   |  ✅ |
+| Support PNG                          |  ❌   |  ✅ |
 
 ## Performance
-|                                      | screenshot | betterss |
+|                                      | [`screenshot`](https://www.qnx.com/developers/docs/7.0.0/com.qnx.doc.screen/topic/manual/screenshot.html) | `betterss` |
 |--------------------------------------|------------|----------|
-| Full screen capture time (1920x1080) | ~1.47s     |  ~0.10s  |
+| Full screen capture time (1920x1080) | ~1.47s     |  **~0.10s** (14.7 times faster)  |
 
 ## Usage
 
@@ -63,7 +63,7 @@ You have to try each index to find the desired display
 
 ## Build
 
-First, run the `proteus_build_config.sh` script to setup enviroment (compiler,...)
+Firstly, setup your build enviroment (QNX compiler,...)
 
 Then `cd` to project directory:
 ```shell
